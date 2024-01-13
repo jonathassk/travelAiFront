@@ -5,8 +5,16 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <p>teste</p>
+        <h1 className='title'> travel AI-ssistant </h1>
       </header>
+
+      <body>
+        <div className='chat'>
+          <div className='chat_header'>
+            <p className='ai_name'>Assistant Name</p>
+          </div>
+        </div>
+      </body>
     </div>
   );
 }

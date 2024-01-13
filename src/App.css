@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  background-color: rgb(186, 214, 247);
+  height: 100vh;
 }
 
 .App-logo {
@@ -7,15 +9,12 @@
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 .App-header {
+  margin-left: 1vh;
+  margin-right: 1vh;
   background-color: #282c34;
-  min-height: 100vh;
+  border-radius: 0 0 10px 10px;
+  height: 10vh;;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,8 +23,41 @@
   color: white;
 }
 
+.title {
+  color: #d7eaf0;
+}
+
 .App-link {
   color: #61dafb;
+}
+
+.chat {
+  background-color: #f3f3f3;
+  margin-left: 1vh;
+  margin-right: 1vh;
+  height: 85vh;
+  margin-top: 2vh;
+  border-radius: 15px 15px 15px 15px;
+}
+
+.chat_header {
+  border-radius: 15px 15px 5px 5px;
+  min-height: 10vh;
+  box-shadow: 1px 5px 28px -10px rgba(0,0,0,0.96);
+
+}
+
+.ai_name {
+  color: #324c6c;
+  font-size: 1.5rem;
+  margin-top: 1vh;
+  margin-bottom: 1vh;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
 }
 
 @keyframes App-logo-spin {
