@@ -11,7 +11,10 @@ function App() {
       <body>
         <div className='chat'>
           <div className='chat_header'>
-            <p className='ai_name'>Assistant Name</p>
+            <div className='chat_info'>
+              <p className='ai_name'>Assistant Name</p>
+              <p className='ai_status'>your travel assistant</p>
+            </div>
           </div>
         </div>
       </body>
