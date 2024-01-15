@@ -45,7 +45,7 @@ body {
   align-self: center;
   max-width: 1000px;
   width: 90vw;
-  height: 85vh;
+  height: 95vh;
   margin-top: 2vh;
   border-radius: 15px 15px 15px 15px;
   max-width: 1000px;
@@ -53,27 +53,57 @@ body {
 }
 
 .chat_header {
-  border-radius: 15px 15px 5px 5px;
+  border-radius: 15px 15px 25px 25px;
   min-height: 10vh;
   box-shadow: 1px 5px 28px -10px rgba(0,0,0,0.96);
   margin-top: -1vh;
+  display: flex;
+  flex-direction: row;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+}
+
+.header_info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;  
+  margin-left: 7vh;
+  text-align: left;
+}
+
+.header_photo { 
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  margin-left: 2vh;
+  margin-right: 1vh;
+  margin-top: 1vh;
+  margin-bottom: 1vh;
+}
+
+.photo_header_img {
+  border-radius: 50%;
+  height: 8vh;
+  width: 8vh;
+  min-width: 30px;
+  min-height: 30px;
 }
 
 .ai_name {
   color: #324c6c;
-  font-family: 'Roboto', sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 1rem;
   font-weight: bold;
-  margin-top: 1vh;
-  margin-bottom: 1vh;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .ai_status {                                              
   color: #324c6c;
   font-family: 'Roboto', sans-serif;
   font-size: 0.8rem;
-  margin-top: 1vh;
-  margin-bottom: 1vh;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 @media (prefers-reduced-motion: no-preference) {
