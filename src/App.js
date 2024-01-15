@@ -1,6 +1,6 @@
-import logo from './logo.svg';
 import user_image from './147144.png';
 import './App.css';
+import ChatComponentMessage from './chat_component_message';
 
 function App() {
   return (
@@ -18,6 +18,8 @@ function App() {
               <p className='ai_status'>your travel assistant</p>
             </div>
           </div>
+          <ChatComponentMessage />
+
         </div>
       </body>
     </div>
