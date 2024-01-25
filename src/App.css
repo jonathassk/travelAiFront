@@ -1,5 +1,4 @@
 .App {
-  text-align: center;
   background-color: #202c3c;
   height: 100dvh;
 
@@ -106,13 +105,30 @@ body {
   margin-bottom: 0;
 }
 
-.message_user {
+.chat_messages {
+  margin: 2vh;
   display: flex;
-  direction: row;
+  align-content: end;
+  flex-direction: column;
+}
+
+.message_user {
   margin-left: 2vh;
   margin-right: 2vh;
   margin-top: 2vh;
   margin-bottom: 2vh;
+  flex-direction: row;
+  display: flex;
+  align-self: flex-end;
+}
+
+.message_assistant {
+  margin-left: 2vh;
+  margin-right: 2vh;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+  flex-direction: row;
+  display: flex;
 }
 
 .chat_message_user {
@@ -138,9 +154,9 @@ body {
 }
 
 .hours {
-  color: #2b435e;
+  color: #8d95a0;
   font-family: 'Roboto', sans-serif;
-  font-size: smaller;
+  font-size: 0.8rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {
