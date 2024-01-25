@@ -113,37 +113,31 @@ body {
 }
 
 .message_user {
-  margin-left: 2vh;
-  margin-right: 2vh;
-  margin-top: 2vh;
-  margin-bottom: 2vh;
+  margin-top: 1vh;
   flex-direction: row;
   display: flex;
   align-self: flex-end;
 }
 
 .message_assistant {
-  margin-left: 2vh;
-  margin-right: 2vh;
-  margin-top: 2vh;
-  margin-bottom: 2vh;
+  margin-top: 1vh;
   flex-direction: row;
   display: flex;
 }
 
 .chat_message_user {
-  background-color: #ffffff;
+  background-color: #9fdfff;
   color: #2b435e;
-  border-radius: 0 20px 20px 20px;
-  margin-right: 2vh;
+  border-radius: 20px 0 20px 20px;
+  margin-left: 2vh;
   padding: 0.1vh 1vh 0.1vh 1vh;
 }
 
 .chat_message_assistant {
   background-color: #1d3557;
   color: #ffffff;
-  border-radius: 20px 0 20px 20px;
-  margin-left: 2vh;
+  border-radius: 0 20px 20px 20px;
+  margin-right: 2vh;
   padding: 0.1vh 1vh 0.1vh 1vh;
 }
 
