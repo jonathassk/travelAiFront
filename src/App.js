@@ -19,24 +19,6 @@ function App() {
         text: 'I am your travel assistant, ask me anything, I will try to help you...',
         sender: 'assistant',
         timestamp: '01:00'
-      },
-      {
-        name: 'mr. flight',
-        text: 'I am your travel assistant',
-        sender: 'user',
-        timestamp: '02:00'
-      },
-      {
-        name: 'mr. flight',
-        text: 'I am your travel assistant',
-        sender: 'assistant',
-        timestamp: '02:20'
-      },
-      {
-        name: 'mr. flight',
-        text: 'I am your travel assistant',
-        sender: 'user',
-        timestamp: '10:00'
       }
     ]);
   }, []);
@@ -64,6 +46,12 @@ function App() {
               />
             ))}
           </div>
+          <div className='send_message_div'>
+            <input type='text' className='chat_input' placeholder='Type a message...' />
+            <button className='chat_send_button'>SEND</button>
+          </div>
+          
+
         </div>
       </body>
     

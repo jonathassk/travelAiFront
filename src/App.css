@@ -153,17 +153,64 @@ body {
   font-size: 0.8rem;
 }
 
+.send_message_div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1vh;
+  margin-bottom: 10vh;
+  margin-top: 4vh;
+}
+
+.chat_input {
+  display: flex;
+  order: 0;
+  flex-grow: 1;
+  flex-shrink: 2;
+  background-color: #f5eeee;
+  border-bottom: 2px solid #8d95a0;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  font-size: 1.0rem;
+  outline: 0;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 1px solid #8d95a0;
+  margin-left: 2vh;
+  margin-right: 1vh;
+}
+
+.chat_input:focus {
+  border-bottom: 2px solid #394966;
+}
+
+.chat_send_button {
+  background-color: #394966;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 15px;
+  border: 0px;
+  margin-right: 2vh;
+  margin-left: 1vh;
+  transition: 200ms;
+}
+
+.chat_send_button:hover {
+  background-color: #000000;
+}
+
+.chat_send_button:active {
+  background-color: #000000;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes color_button {
+  from {background-color: #687999;}
+  to {background-color: rgb(0, 0, 0);}
 }
