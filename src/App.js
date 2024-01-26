@@ -11,6 +11,8 @@ function App() {
 
   const [name, setName] = useState('user');
   const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const [randomVariable, setRandomVariable] = useState('');
 
   useEffect(() => {
     setMessages([
@@ -18,43 +20,66 @@ function App() {
         name: 'mr. flight',
         text: 'I am your travel assistant, ask me anything, I will try to help you...',
         sender: 'assistant',
-        timestamp: '01:00'
+        timestamp: new Date().toLocaleTimeString()
       }
     ]);
   }, []);
 
-  return (
-    
-      <body className="App">
-        <div className='chat'>
-          <div className='chat_header'>
-            <div className='header_photo'>
-              <img src={user_image} className="photo_header_img" alt="logo" />
-            </div>
-            <div className='header_info'>
-              <p className='ai_name'>{text2}</p>
-              <p className='ai_status'>{text}</p>
-            </div>
-          </div>
-          <div className='chat_messages'>
-            {messages.map((message, index) => (
-              <ChatComponentMessage
-                key={index}
-                sender={message.sender}
-                message={message.text}
-                time={message.timestamp}
-              />
-            ))}
-          </div>
-          <div className='send_message_div'>
-            <input type='text' className='chat_input' placeholder='Type a message...' />
-            <button className='chat_send_button'>SEND</button>
-          </div>
-          
+  const handleSendClick = () => {
+    if (inputText == '') return; 
+    setMessages([
+      ...messages,
+      {
+        name: name,
+        text: inputText,
+        sender: 'user',
+        timestamp: new Date().toLocaleTimeString()
+      }
+    ]);
+    setInputText('');
+  };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSendClick();
+    }
+  };
+
+  return (
+    <body className="App">
+      <div className='chat'>
+        <div className='chat_header'>
+          <div className='header_photo'>
+            <img src={user_image} className="photo_header_img" alt="logo" />
+          </div>
+          <div className='header_info'>
+            <p className='ai_name'>{text2}</p>
+            <p className='ai_status'>{text}</p>
+          </div>
         </div>
-      </body>
-    
+        <div className='chat_messages'>
+          {messages.map((message, index) => (
+            <ChatComponentMessage
+              key={index}
+              sender={message.sender}
+              message={message.text}
+              time={message.timestamp}
+            />
+          ))}
+        </div>
+        <div className='send_message_div'>
+          <input
+            type='text'
+            className='chat_input'
+            placeholder='Type a message...'
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleKeyDown} // Add this line
+          />
+          <button className='chat_send_button' onClick={handleSendClick}>SEND</button>
+        </div>
+      </div>
+    </body>
   );
 }
 
