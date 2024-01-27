@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ChatView from '../components/ChatView';
 import { useTypingEffect } from '../utils/typingeffect';
-import io from 'socket.io-client';
 
 function ChatLogic() {
   const text = useTypingEffect("I'm your travel assistant", 20);
@@ -48,32 +47,8 @@ function ChatLogic() {
     }
   };
 
-  useEffect(() => {
-    connectAndSendData();
-  }, []);
 
-  function connectAndSendData() {
-    const socket = io('https://tt8v0tezs8.execute-api.sa-east-1.amazonaws.com/production/');
-
-    // Connect to the socket server
-    socket.on('connect', () => {
-      console.log('Connected to the socket server');
-      
-      // Send data to the server
-      socket.emit('find_airport', { message: 'Hello, server!' });
-    });
-
-    // Handle received data from the server
-    socket.on('find_airport', (data) => {
-      console.log('Received data from the server:', data);
-    });
-
-    // Disconnect from the socket server
-    socket.on('disconnect', () => {
-      console.log('Disconnected from the socket server');
-    });
-  }
-
+  
   return (
     <ChatView
       text={text}
