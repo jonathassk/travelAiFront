@@ -6,7 +6,6 @@ export function useTypingEffect(textToType, interKeyStrokeDurationInMs) {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      console.log("interval");
       setCurrentPosition((value) => value + 1);
       currentPositionRef.current += 1;
       if (currentPositionRef.current > textToType.length) {

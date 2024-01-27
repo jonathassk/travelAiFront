@@ -117,12 +117,14 @@ body {
   flex-direction: row;
   display: flex;
   align-self: flex-end;
+  animation: new_message_assistant 300ms ease-in-out;
 }
 
 .message_assistant {
   margin-top: 1vh;
   flex-direction: row;
   display: flex;
+  animation: new_message_assistant 300ms ease-in-out;
 }
 
 .chat_message_user {
@@ -213,4 +215,9 @@ body {
 @keyframes color_button {
   from {background-color: #687999;}
   to {background-color: rgb(0, 0, 0);}
+}
+
+@keyframes new_message_assistant {
+  from {opacity: 0; transform: translateX(10px);}
+  to {opacity: 1;}
 }
