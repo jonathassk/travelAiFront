@@ -3,7 +3,7 @@ import ChatView from '../components/ChatView';
 import { useTypingEffect } from '../utils/typingeffect';
 
 const URL = 'wss://tt8v0tezs8.execute-api.sa-east-1.amazonaws.com/production/';
-
+const socket = new WebSocket(URL);
 function ChatLogic() {
   const text = useTypingEffect("I'm your travel assistant", 20);
   const text2 = useTypingEffect("mr. flight", 20);
@@ -12,9 +12,9 @@ function ChatLogic() {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isConnected, setIsConnected] = useState(false);
-
+  
   useEffect(() => {
-    const socket = new WebSocket(URL);
+    
     setMessages([
       {
         text: 'Olá, sou seu assistente de viagem, voce poderia me informar seu nome?',
@@ -22,13 +22,9 @@ function ChatLogic() {
         timestamp: new Date().toLocaleTimeString()
       }
     ]);
-    console.log('trying to connect');
     
     socket.onopen = () => {
-      const message = {
-        action: 'find_airport'
-      }
-      socket.send(JSON.stringify(message));
+      console.log('trying to connect');
     }
 
     socket.onmessage = (event) => {
@@ -72,6 +68,10 @@ function ChatLogic() {
       setMessages([...messages, newMessage]);
     }
     setInputText('');
+    const message = {
+      action: 'find_airport'
+    }
+    socket.send(JSON.stringify(message));
   };
 
   const handleKeyDown = (e) => {
