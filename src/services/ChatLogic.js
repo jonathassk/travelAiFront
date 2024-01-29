@@ -33,8 +33,7 @@ function ChatLogic() {
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString()
       };
-
-      setMessages([...messages, newMessage]);
+      setMessages(prevMessages => [...prevMessages, newMessage]);
     };
 
     socket.onclose = () => {
