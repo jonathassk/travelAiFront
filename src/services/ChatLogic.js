@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ChatView from '../components/ChatView';
 import { useTypingEffect } from '../utils/typingeffect';
+
+const URL = 'wss://tt8v0tezs8.execute-api.sa-east-1.amazonaws.com/production/';
 
 function ChatLogic() {
   const text = useTypingEffect("I'm your travel assistant", 20);
@@ -9,8 +11,10 @@ function ChatLogic() {
   const [name, setName] = useState('');
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    const socket = new WebSocket(URL);
     setMessages([
       {
         text: 'Olá, sou seu assistente de viagem, voce poderia me informar seu nome?',
@@ -18,27 +22,56 @@ function ChatLogic() {
         timestamp: new Date().toLocaleTimeString()
       }
     ]);
+    console.log('trying to connect');
+    
+    socket.onopen = () => {
+      const message = {
+        action: 'find_airport'
+      }
+      socket.send(JSON.stringify(message));
+    }
+
+    socket.onmessage = (event) => {
+      const newMessage = {
+        text: event.data,
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString()
+      };
+
+      setMessages([...messages, newMessage]);
+    };
+
+    socket.onclose = () => {
+      setIsConnected(false);
+    };
+
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    return () => {
+      socket.close();
+    };
   }, []);
 
   const handleSendClick = () => {
-      const newMessage = {
-          text: inputText,
-          sender: 'user',
-          timestamp: new Date().toLocaleTimeString()
-      };
+    const newMessage = {
+      text: inputText,
+      sender: 'user',
+      timestamp: new Date().toLocaleTimeString()
+    };
 
-      if (name === '') {
-          setMessages([...messages, newMessage, {
-              text: `Ola ${inputText}, Você gostaria de incluir os voos de ida e volta no seu orçamento de viagem?`,
-              sender: 'assistant',
-              timestamp: new Date().toLocaleTimeString()
-          }]);
-          setName(inputText);
-      } else {
-          setMessages([...messages, newMessage]);
-      }
-
-      setInputText('');
+    if (name === '') {
+      setMessages([...messages, newMessage, {
+        text: `Ola ${inputText}, Você gostaria de incluir os voos de ida e volta no seu orçamento de viagem?`,
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString()
+      }]);
+      setName(inputText);
+    } else {
+      setMessages([...messages, newMessage]);
+    }
+    setInputText('');
   };
 
   const handleKeyDown = (e) => {
@@ -47,8 +80,6 @@ function ChatLogic() {
     }
   };
 
-
-  
   return (
     <ChatView
       text={text}
