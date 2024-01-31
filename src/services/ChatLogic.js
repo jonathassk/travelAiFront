@@ -66,12 +66,14 @@ function ChatLogic() {
       }]);
       setName(inputText);
     } else if (airport === '') {
+      setMessages([...messages, newMessage]);
       console.log('airport');
-      const message = {
+      const dataSended = {
         action: 'ensure_have_airport',
         awnser: inputText,
       }
-      socket.send(JSON.stringify(message));
+      setAirport(inputText);
+      socket.send(JSON.stringify(dataSended));
     } else {
       setMessages([...messages, newMessage]);
     }
