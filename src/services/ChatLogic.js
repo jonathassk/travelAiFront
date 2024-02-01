@@ -13,6 +13,7 @@ function ChatLogic() {
   const [inputText, setInputText] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [airport, setAirport] = useState('');
+  const [accommodation, setAccommodation] = useState('');
   
   useEffect(() => {
     
@@ -35,7 +36,7 @@ function ChatLogic() {
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString()
       };
-      setMessages(prevMessages => [...prevMessages, newMessage]);
+      if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]);
     };
 
     socket.onclose = () => {
@@ -67,19 +68,25 @@ function ChatLogic() {
       setName(inputText);
     } else if (airport === '') {
       setMessages([...messages, newMessage]);
-      console.log('airport');
-      const dataSended = {
+      const data = {
         action: 'ensure_have_airport',
         awnser: inputText,
       }
       setAirport(inputText);
-      socket.send(JSON.stringify(dataSended));
+      socket.send(JSON.stringify(data));
+    } else if (accommodation === '') {
+      console.log('accomodation')
+      setMessages([...messages, newMessage]);
+      const data = {
+        action: 'ensure_need_accommodation',
+        awnser: inputText,
+      }
+      setAccommodation(inputText);
+      socket.send(JSON.stringify(data));
     } else {
       setMessages([...messages, newMessage]);
     }
-    setInputText('');
-    
-    
+    setInputText(''); 
   };
 
   const handleKeyDown = (e) => {
