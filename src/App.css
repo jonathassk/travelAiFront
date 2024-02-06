@@ -110,6 +110,8 @@ body {
   display: flex;
   align-content: end;
   flex-direction: column;
+  overflow-y: auto;
+  height: 65vh;
 }
 
 .message_user {

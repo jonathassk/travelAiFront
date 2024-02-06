@@ -58,16 +58,19 @@ function ChatLogic() {
           console.log("A mensagem não contém um campo 'message' válido.");
           return;
         }
-        if (jsonData.step == "airports_defined") {
+        if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]);
+        if (jsonData.step == "airports_defined" && jsonData.status != "missing_destination") {
           const editedDeparture = cityData(jsonData.departure);
           createMessageOptionsAirports(editedDeparture);
+        } else if (jsonData.step == "airports_defined") {
+          setInputText(departure);
         }
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
         return;
       }
       
-      if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]);
+      
     };
 
     socket.onclose = () => {
@@ -100,19 +103,16 @@ function ChatLogic() {
 
   const createMessageOptionsAirports = data => {
     try {
-      const options = data.map(item => {
-        //if (item.entityType === 'CITY') 
-        return `${item.skyId} - ${item.localizedName} - ${item.suggestionTitle} \n`;
+      data.map(item => {
+        const options = `${item.skyId} - ${item.suggestionTitle}`;
+        const newMessage = {
+          text: options, // Array de strings
+          sender: 'assistant',
+          timestamp: new Date().toLocaleTimeString(),
+        };
+        setMessages(prevMessages => [...prevMessages, newMessage]);
       });
-      console.log(options)
-      const newMessage = {
-        text: options,
-        sender: 'assistant',
-        timestamp: new Date().toLocaleTimeString(),
-      };
-      
-      setMessages(prevMessages => [...prevMessages, newMessage]); // Update this line
-      
+       
     } catch (error) {
       console.error("Erro ao fazer o parsing da string JSON:", error);
       return;
