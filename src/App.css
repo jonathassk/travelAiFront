@@ -42,13 +42,13 @@ body {
 .chat {
   background-color: #f5eeee;
   align-self: center;
-  max-width: 1000px;
   width: 90vw;
   height: 95vh;
   margin-top: 2vh;
   border-radius: 15px 15px 15px 15px;
   max-width: 1000px;
-
+  position: fixed; 
+  top: 0; 
 }
 
 .chat_header {
