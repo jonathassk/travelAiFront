@@ -59,11 +59,9 @@ function ChatLogic() {
           return;
         }
         if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]);
-        if (jsonData.step == "airports_defined" && jsonData.status != "missing_destination") {
+        if (jsonData.step == "airports_defined" && jsonData.status == "choosing_airport_departure") {
           const editedDeparture = cityData(jsonData.departure);
           createMessageOptionsAirports(editedDeparture);
-        } else if (jsonData.step == "airports_defined") {
-          setInputText(departure);
         }
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
@@ -146,9 +144,20 @@ function ChatLogic() {
       const data = {
         action: 'find_cities',
         awnser: inputText,
+        stepTravel: "departure",
       }
       socket.send(JSON.stringify(data));
       setInputText(''); 
+    } else if (departure != "" && destination == "") {
+      setMessages([...messages, newMessage]);
+      const data = {
+        action: 'find_cities',
+        awnser: inputText,
+        
+        stepTravel: "destination",
+        departure: departure
+      }
+      socket.send(JSON.stringify(data));
     } else if (accommodation === '') {
       setMessages([...messages, newMessage]);
       const data = {
