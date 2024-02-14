@@ -56,10 +56,15 @@ function ChatLogic() {
           return;
         }
         if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]);
-        if (jsonData.step === "airports_defined" && jsonData.status === "choosing_airport_departure") {
+        if (jsonData.status === "choosing_airport_departure" || jsonData.status === "completed_departure") {
           const editedDeparture = cityData(jsonData.departure);
           dispatch({ type: 'setDeparture', payload: jsonData.departure });
-          createMessageOptionsAirports(editedDeparture);
+          if (jsonData.status === "choosing_airport_departure") createMessageOptionsAirports(editedDeparture);
+        }
+        if (jsonData.status === "completed_destination" || jsonData.status === "choosing_airport_destination") {
+          const editedDestination = cityData(jsonData.destination);
+          dispatch({ type: 'setDestination', payload: jsonData.destination });
+          if (jsonData.status === "choosing_airport_destination") createMessageOptionsAirports(editedDestination);
         }
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
@@ -172,7 +177,6 @@ function ChatLogic() {
       }
       socket.send(JSON.stringify(data));
     } else if (step === 'airports_defined' && status === 'choosing_airport_departure') {
-      
       const filtered = state.departure.filter(item => item.skyId === inputText)
       console.log('filtered', filtered)
       if (filtered.length === 0) {
@@ -184,14 +188,14 @@ function ChatLogic() {
         return;
       }
       dispatch({ type: 'filterDeparture', payload: filtered });
-      setInterval(() => {
-        const data = {
-          action: 'find_airport',
-          departure: filtered,
-          destination: null,
-        }
+      
+      const data = {
+        action: 'find_airport',
+        departure: filtered,
+        destination: null,
+      }
+      console.log('data', data)
       socket.send(JSON.stringify(data));
-      }, 400);
       
     } else if (step === 'airports_defined' && status === 'completed_departure') {
       setMessages([...messages, newMessage]);

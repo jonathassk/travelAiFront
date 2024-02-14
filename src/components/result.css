@@ -1,0 +1,159 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+.city {
+    font-family: 'Titan One', sans-serif;
+    color: white;
+    Font-size: 4em;
+}
+
+.country {
+    font-family: 'Titan One', sans-serif;
+    color: white;
+    Font-size: 2em;
+}
+
+.activity_div{
+    background-color: #3ebfb0;
+    padding-left: 1em;
+    padding-right: 3px;
+    box-shadow: -6px 6px 0px 6px #2cd4d4;
+    
+}
+
+.activity_header { 
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.activity_header_title {
+    font-family: 'arial', sans-serif;
+    font-weight: bold;
+    color: #082627;
+    Font-size: 2em;
+    margin-top: 10px;
+}
+
+.activity_body {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.activity_header_day {
+    font-family: 'Titan One', sans-serif;
+    color: #f1faf9;
+    Font-size: 2em;
+    margin-top: 10px;
+    writing-mode: vertical-rl;
+    position: relative;
+    margin: 0;
+    text-shadow: 2px 2px 0px #082627;
+}
+
+.activity_infos_name_price {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.activity_infos {
+    background: rgb(193,182,182);
+    background: linear-gradient(0deg, rgba(193,182,182,1) 100%, rgba(194,184,176,1) 0%); 
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    margin-bottom: 0.8vb;
+    width: 100%;
+    --mask:
+    radial-gradient(7.32px at 10.20px 50%,#000 99%,#0000 101%) 0 calc(50% - 12px)/51% 24px repeat-y,
+    radial-gradient(7.32px at -4.2px 50%,#0000 99%,#000 101%) 6px 50%/calc(51% - 6px) 24px repeat-y,
+		radial-gradient(7.32px at calc(100% - 10.20px) 50%,#000 99%,#0000 101%) 100% 50%/51% 24px repeat-y,
+    radial-gradient(7.32px at calc(100% + 4.20px) 50%,#0000 99%,#000 101%) calc(100% - 6px) calc(50% - 12px)/calc(51% - 6px) 24px repeat-y;
+  -webkit-mask: var(--mask);
+          mask: var(--mask);
+}
+
+.activity_name {
+    color: #082627;
+    font-family: 'arial', sans-serif;
+    font-weight: bold;
+}
+
+.activity_price {
+    color: rgb(193,182,182);
+    font-family: 'arial', sans-serif;
+    background-color: #082627;
+    font-weight: bold;
+    width: 60px;
+    border-radius: 15%;
+    margin-left: 5px;
+}
+
+.activity_site {
+    align-self: center;
+    align-items: center;
+}
+
+.div_infos_group {
+    margin-bottom: 15px;
+    border-bottom: 2px dashed #08262744;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.meals_div {
+    background-color: #cf6854;
+    padding-left: 1em;
+    padding-right: 3px;
+    box-shadow: -6px 6px 0px 6px #c98a75;
+}
+
+.meals_body {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meals_header_title {
+    font-family: 'arial', sans-serif;
+    font-weight: bold;
+    color: #550000;
+    Font-size: 2em;
+    margin-top: 10px;
+}
+
+.meals_header_day {
+    font-family: 'Titan One', sans-serif;
+    color: rgb(241, 206, 206);
+    Font-size: 2em;
+    margin-top: 10px;
+    writing-mode: vertical-rl;
+    position: relative;
+    margin: 0;
+    text-shadow: 2px 2px 0px #550000;
+}
+
+.meals_infos {
+    background: rgb(193,182,182);
+    background: linear-gradient(0deg, rgba(193,182,182,1) 100%, rgba(194,184,176,1) 0%); 
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    margin-bottom: 0.8vb;
+    width: 100%;
+    --mask:
+    radial-gradient(7.32px at 10.20px 50%,#000 99%,#0000 101%) 0 calc(50% - 12px)/51% 24px repeat-y,
+    radial-gradient(7.32px at -4.2px 50%,#0000 99%,#000 101%) 6px 50%/calc(51% - 6px) 24px repeat-y,
+		radial-gradient(7.32px at calc(100% - 10.20px) 50%,#000 99%,#0000 101%) 100% 50%/51% 24px repeat-y,
+    radial-gradient(7.32px at calc(100% + 4.20px) 50%,#0000 99%,#000 101%) calc(100% - 6px) calc(50% - 12px)/calc(51% - 6px) 24px repeat-y;
+  -webkit-mask: var(--mask);
+          mask: var(--mask);
+}
