@@ -38,7 +38,7 @@ const initialTravelPlan: tralvelPlan = {
   country: 'thailand',
   activitites: [
     {
-      name: 'Experience the nightlife at Khao San Road',
+      name: 'Experience the nightlife at Khao San Road, xperience the nightlife at Khao San Road, xperience the nightlife at Khao San Road, xperience the nightlife at Khao San Road',
       price: 1000,
       site: 'grandpalac.com.br'
     },
@@ -105,26 +105,24 @@ export default function ResultPage() {
       <div className='activity_div'>
         <p className='activity_header_title'>ACTIVITIES</p>
         <div className='activity_body'>
-        <p className='activity_header_day'>DIA 1</p>
-        <div className='activity_infos' >
-          {state.travelPlan.activitites.map((activity, i) => (
-            <div className='div_infos_group'>
-              <div className='activity_infos_name_price' key={i}>
-                <p className='activity_name'> {activity.name} </p>
-                <p className='activity_price'>{activity.price} USD</p>
+          <p className='activity_header_day'>DIA 1</p>
+          <div className='activity_infos' >
+            {state.travelPlan.activitites.map((activity, i) => (
+              <div className='div_infos_group'>
+                <div className='activity_infos_name_price' key={i}>
+                  <p className='activity_name'> {activity.name} </p>
+                  <p className='activity_price'>{activity.price} USD</p>
+                </div>
+                <p className='activity_site'> {activity.site} </p>
               </div>
-              <p className='activity_site'> {activity.site} </p>
-            </div>
-          ))}
-          
+            ))}
           </div>
         </div>
-        
       </div>
       <div className='meals_div'>
         <p className='meals_header_title'>MEALS</p>
         <div className='meals_body'>
-        <p className='meals_header_day'>DIA 1</p>
+        
         <div className='meals_infos' >
           {state.travelPlan.meals.map((activity, i) => (
             <div className='div_infos_group'>
@@ -137,6 +135,7 @@ export default function ResultPage() {
           ))}
           
           </div>
+          <p className='meals_header_day'>DIA 1</p>
         </div>
     </div>
     </div>

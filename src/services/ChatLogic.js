@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import ChatView from '../components/ChatView';
 import { useTypingEffect } from '../utils/typingeffect';
 import createWebSocket from '../utils/socketConfig';
@@ -13,15 +13,13 @@ function ChatLogic() {
   const [status, setStatus] = useState('');
   const [step, setStep] = useState('');
 
-  const [state, dispatch] = useReducer(reducer, {name: '', departure: [], destination: [], date: Date.now(), returnDate: Date.now()});
+  const [state, dispatch] = useReducer(reducer, {name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hotels: [], activities: {}, city: "", days: 0, value: 0});
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [airport, setAirport] = useState('');
   const [departure, setDeparture] = useState([]);
-  const [destination, setDestination] = useState('');
-  const [accommodation, setAccommodation] = useState('');
   
   useEffect(() => {
     
@@ -43,6 +41,8 @@ function ChatLogic() {
 
       try {
         const jsonData = JSON.parse(event.data);
+        console.log('jsonData', jsonData)
+        
         if (jsonData && jsonData.step) setStep(jsonData.step);
         if (jsonData && jsonData.status) setStatus(jsonData.status);
         if (jsonData && jsonData.message) {
@@ -55,7 +55,7 @@ function ChatLogic() {
           console.log("A mensagem não contém um campo 'message' válido.");
           return;
         }
-        if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]);
+        if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]); 
         if (jsonData.status === "choosing_airport_departure" || jsonData.status === "completed_departure") {
           const editedDeparture = cityData(jsonData.departure);
           dispatch({ type: 'setDeparture', payload: jsonData.departure });
@@ -66,6 +66,31 @@ function ChatLogic() {
           dispatch({ type: 'setDestination', payload: jsonData.destination });
           if (jsonData.status === "choosing_airport_destination") createMessageOptionsAirports(editedDestination);
         }
+        if (jsonData.status === "waiting_return_date" && jsonData.step === "format_date") dispatch({ type: 'setDate', payload: jsonData.date });
+        if (jsonData.status === "completed_return_date" && jsonData.step === "format_date") {
+          dispatch({ type: 'setReturnDate', payload: jsonData.returnDate });
+          const data = {
+            action: 'find_flights',
+            departure: state.departure,
+            destination: state.destination,
+            date: state.date,
+            returnDate: jsonData.returnDate,
+          }
+          socket.send(JSON.stringify(data));
+        }
+        if (jsonData.status === 'waiting_quantity_days' && jsonData.step === "create_activities") dispatch({ type: 'setCity', payload: jsonData.value });
+
+        if (jsonData.status === 'waiting_value' && jsonData.step === "create_activities") {
+          dispatch({ type: 'setDays', payload: jsonData.value });
+        }
+        if (jsonData.status === 'completed_activity' && jsonData.step === "create_activities") {
+          jsonData.result = jsonData.value.replace(/\n/g, '');
+          const parseValue = JSON.parse(jsonData.result);
+          const parsed = JSON.parse(parseValue);
+          dispatch({ type: 'setValue', payload: jsonData.price });
+          dispatch({ type: 'setActivities', payload: parsed });
+        }
+        
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
         return;
@@ -97,6 +122,20 @@ function ChatLogic() {
         return { ...state, destination: action.payload };
       case 'filterDeparture':
         return { ...state, departure: action.payload };
+      case 'setDate':
+        return { ...state, date: action.payload };
+      case 'setReturnDate':
+        return { ...state, returnDate: action.payload };
+      case 'setName':
+        return { ...state, name: action.payload };
+      case 'setCity':
+        return { ...state, city: action.payload };
+      case 'setDays':
+        return { ...state, days: action.payload };
+      case 'setValue': 
+        return { ...state, value: action.payload };
+      case 'setActivities':
+        return { ...state, activities: action.payload };
       default:
         return state;
     }
@@ -150,6 +189,7 @@ function ChatLogic() {
         timestamp: new Date().toLocaleTimeString()
       }]);
       setName(inputText);
+      dispatch({ type: 'setName', payload: inputText });
       setInputText(''); 
       return;
     }
@@ -172,19 +212,19 @@ function ChatLogic() {
       setInputText(''); 
     } else if (step === "flights" && status === false) {
       const data = {
-        action: 'ensure_need_accommodation',
+        action: 'find_activities',
         awnser: inputText,
       }
       socket.send(JSON.stringify(data));
     } else if (step === 'airports_defined' && status === 'choosing_airport_departure') {
-      const filtered = state.departure.filter(item => item.skyId === inputText)
-      console.log('filtered', filtered)
+      const filtered = state.departure.filter(item => item.skyId === inputText.toUpperCase())
       if (filtered.length === 0) {
         setMessages([...messages, newMessage, {
           text: 'Por favor, escolha um aeroporto válido. (use as siglas indicadas)',
           sender: 'assistant',
           timestamp: new Date().toLocaleTimeString()
         }]);
+        setInputText(''); 
         return;
       }
       dispatch({ type: 'filterDeparture', payload: filtered });
@@ -207,23 +247,80 @@ function ChatLogic() {
       setDeparture(inputText);
       socket.send(JSON.stringify(data));
     } else if (step === 'airports_defined' && status === 'choosing_airport_destination') {
+      const filtered = state.destination.filter(item => item.skyId === inputText.toUpperCase())
+      if (filtered.length === 0) {
+        setMessages([...messages, newMessage, {
+          text: 'Por favor, escolha um aeroporto válido. (use as siglas indicadas)',
+          sender: 'assistant',
+          timestamp: new Date().toLocaleTimeString()
+        }]);
+        setInputText(''); 
+        return;
+      }
       const data = {
-        action: 'findAirport',
-        departure: departure.find(item => item.skyId === inputText),
-        destination: destination.find(item => item.skyId === inputText),
+        action: 'find_airport',
+        departure: departure,
+        destination: filtered,
       }
       socket.send(JSON.stringify(data));
     } else if (step === 'airports_defined' && status === 'completed_destination') {
       setMessages([...messages, newMessage]);
       const data = {
-        action: 'ensure_need_accommodation',
+        action: 'format_date',
+        awnser: inputText,
+        field: 'date'
+      }
+      socket.send(JSON.stringify(data));
+    setInputText(''); 
+    } else if (step === 'format_date' && status === 'waiting_return_date') {
+      setMessages([...messages, newMessage]);
+      let data = {
+        action: 'format_date',
+        awnser: inputText,
+        field: 'returnDate'
+      }
+      console.log('IT', inputText.toLowerCase())
+      if (inputText.toLowerCase() === 'no' || inputText.toLowerCase() === 'não' || inputText.toLowerCase() === 'nao' || inputText.toLowerCase() === 'n') {
+        data = {
+          action: 'find_flights',
+          departure: state.departure,
+          destination: state.destination,
+          date: state.date,
+          returnDate: null,
+        }
+      }
+      console.log(JSON.stringify(data))
+      socket.send(JSON.stringify(data));
+    } else if (step === 'create_activities' && status === true) {
+      setMessages([...messages, newMessage]);
+      const data = {
+        action: 'find_activities',
         awnser: inputText,
       }
-      setAccommodation(inputText);
       socket.send(JSON.stringify(data));
+    } else if (step === 'create_activities' && status === "waiting_quantity_days") {
+      setMessages([...messages, newMessage]);
+      const data = {
+        action: 'find_activities',
+        city: state.city,
+        awnser: inputText,
+      }
+      socket.send(JSON.stringify(data));
+    } else if (step === 'create_activities' && status === "waiting_value") {
+      setMessages([...messages, newMessage]);
+      const data = {
+        action: 'find_activities',
+        city: state.city,
+        days: state.days,
+        awnser: inputText,
+      }
+      socket.send(JSON.stringify(data));
+    
     }
     setInputText(''); 
-  };
+    
+  }
+
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {

@@ -7,7 +7,7 @@ import ResultPage from './services/resultPage.tsx';
 function App() {
   return (
     <body className="App">
-      <ResultPage />
+      <ChatLogic />
     </body>
   );
 }
