@@ -1,6 +1,7 @@
 import React from 'react';
 import user_image from '../147144.png';
 import ChatComponentMessage from '../chatComponentMessage';
+import { Navigate, Link } from "react-router-dom";
 
 function ChatView({
   text,
@@ -42,6 +43,7 @@ function ChatView({
           onKeyDown={handleKeyDown}
         />
         <button className='chat_send_button' onClick={handleSendClick}>SEND</button>
+        <Link to="/result">Result</Link>
       </div>
     </div>
   );

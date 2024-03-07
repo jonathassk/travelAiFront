@@ -2,6 +2,7 @@ import React, { useEffect, useReducer, useState } from 'react';
 import ChatView from '../components/ChatView';
 import { useTypingEffect } from '../utils/typingeffect';
 
+
 const URL = 'wss://tt8v0tezs8.execute-api.sa-east-1.amazonaws.com/production/';
 const socket = new WebSocket(URL);
 function ChatLogic() {
@@ -19,6 +20,7 @@ function ChatLogic() {
   const [isConnected, setIsConnected] = useState(false);
   const [airport, setAirport] = useState('');
   const [departure, setDeparture] = useState([]);
+
   
   useEffect(() => {
     
@@ -80,7 +82,10 @@ function ChatLogic() {
           dispatch({ type: 'setReturnDate', payload: jsonData.date });
         }
         if (jsonData.status === "choosing_flight" && jsonData.step === "choose_flights") {
-          console.log('jsonData', jsonData)
+          dispatch({ type: 'setFlights', payload: jsonData.flights });
+        }
+        if (jsonData.status === "completed_activity" && jsonData.step === "create_activities") {
+          dispatch({ type: 'setActivities', payload: jsonData.value });
         }
         if (jsonData.status === 'waiting_quantity_days' && jsonData.step === "create_activities") dispatch({ type: 'setCity', payload: jsonData.value });
         if (jsonData.status === "waiting_value" && jsonData.step === "create_activities") {
@@ -95,7 +100,10 @@ function ChatLogic() {
           dispatch({ type: 'setActivities', payload: parsed });
           return;
         }
-        
+
+        if (state.activities.length !== 0 && state.flights.length !== 0 && state.hasFlight === true || state.hasFlight === false && state.activities.length !== 0) {
+          
+        }
         
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
@@ -188,6 +196,7 @@ function ChatLogic() {
 
   const handleSendClick = () => {
     if (inputText === '') return;
+    
     const newMessage = {
       text: inputText,
       sender: 'user',
