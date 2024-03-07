@@ -1,7 +1,6 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import ChatView from '../components/ChatView';
 import { useTypingEffect } from '../utils/typingeffect';
-import createWebSocket from '../utils/socketConfig';
 
 const URL = 'wss://tt8v0tezs8.execute-api.sa-east-1.amazonaws.com/production/';
 const socket = new WebSocket(URL);
@@ -13,7 +12,7 @@ function ChatLogic() {
   const [status, setStatus] = useState('');
   const [step, setStep] = useState('');
 
-  const [state, dispatch] = useReducer(reducer, {name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hotels: [], activities: {}, city: "", days: 0, value: 0});
+  const [state, dispatch] = useReducer(reducer, {name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hotels: [], activities: [], city: "", days: 0, value: 0, hasFlight: null});
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -56,40 +55,47 @@ function ChatLogic() {
           return;
         }
         if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]); 
+        if (jsonData.status === true && jsonData.step === "create_activities") {
+          dispatch({ type: 'setHasFlight', payload: false});
+        } else if (jsonData.status === true && jsonData.step === "flights") {
+          dispatch({ type: 'setHasFlight', payload: true});
+        }
         if (jsonData.status === "choosing_airport_departure" || jsonData.status === "completed_departure") {
           const editedDeparture = cityData(jsonData.departure);
           dispatch({ type: 'setDeparture', payload: jsonData.departure });
           if (jsonData.status === "choosing_airport_departure") createMessageOptionsAirports(editedDeparture);
+          return;
         }
         if (jsonData.status === "completed_destination" || jsonData.status === "choosing_airport_destination") {
           const editedDestination = cityData(jsonData.destination);
           dispatch({ type: 'setDestination', payload: jsonData.destination });
           if (jsonData.status === "choosing_airport_destination") createMessageOptionsAirports(editedDestination);
+          return;
         }
-        if (jsonData.status === "waiting_return_date" && jsonData.step === "format_date") dispatch({ type: 'setDate', payload: jsonData.date });
-        if (jsonData.status === "completed_return_date" && jsonData.step === "format_date") {
-          dispatch({ type: 'setReturnDate', payload: jsonData.returnDate });
-          const data = {
-            action: 'find_flights',
-            departure: state.departure,
-            destination: state.destination,
-            date: state.date,
-            returnDate: jsonData.returnDate,
-          }
-          socket.send(JSON.stringify(data));
+        if (jsonData.status === "waiting_return_date" && jsonData.step === "format_date") {
+          dispatch({ type: 'setDate', payload: jsonData.date });
+          return;
+        }
+        if (jsonData.status === "completed_date") {
+          dispatch({ type: 'setReturnDate', payload: jsonData.date });
+        }
+        if (jsonData.status === "choosing_flight" && jsonData.step === "choose_flights") {
+          console.log('jsonData', jsonData)
         }
         if (jsonData.status === 'waiting_quantity_days' && jsonData.step === "create_activities") dispatch({ type: 'setCity', payload: jsonData.value });
-
-        if (jsonData.status === 'waiting_value' && jsonData.step === "create_activities") {
+        if (jsonData.status === "waiting_value" && jsonData.step === "create_activities") {
           dispatch({ type: 'setDays', payload: jsonData.value });
+          return;
         }
-        if (jsonData.status === 'completed_activity' && jsonData.step === "create_activities") {
+        if (jsonData.status === "completed_activity" && jsonData.step === "create_activities") {
           jsonData.result = jsonData.value.replace(/\n/g, '');
           const parseValue = JSON.parse(jsonData.result);
           const parsed = JSON.parse(parseValue);
           dispatch({ type: 'setValue', payload: jsonData.price });
           dispatch({ type: 'setActivities', payload: parsed });
+          return;
         }
+        
         
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
@@ -136,6 +142,12 @@ function ChatLogic() {
         return { ...state, value: action.payload };
       case 'setActivities':
         return { ...state, activities: action.payload };
+      case 'returnValues':
+        return {...state};
+      case 'setFlights':
+        return { ...state, flights: action.payload };
+      case 'setHasFlight':
+        return { ...state, hasFlight: action.payload };
       default:
         return state;
     }
@@ -175,6 +187,7 @@ function ChatLogic() {
   }
 
   const handleSendClick = () => {
+    if (inputText === '') return;
     const newMessage = {
       text: inputText,
       sender: 'user',
@@ -194,7 +207,7 @@ function ChatLogic() {
       return;
     }
 
-    if (airport === '') { // pergunta se deseja incluir voos de ida e volta
+    if (airport === '') {
       setMessages([...messages, newMessage]);
       const data = {
         action: 'ensure_have_airport',
@@ -277,19 +290,21 @@ function ChatLogic() {
       let data = {
         action: 'format_date',
         awnser: inputText,
-        field: 'returnDate'
+        field: 'return_date'
       }
-      console.log('IT', inputText.toLowerCase())
       if (inputText.toLowerCase() === 'no' || inputText.toLowerCase() === 'não' || inputText.toLowerCase() === 'nao' || inputText.toLowerCase() === 'n') {
-        data = {
-          action: 'find_flights',
-          departure: state.departure,
-          destination: state.destination,
-          date: state.date,
-          returnDate: null,
-        }
+        data.awnser = null;
       }
-      console.log(JSON.stringify(data))
+      socket.send(JSON.stringify(data));  
+    } else if (status === "completed_date" && step === "format_date") {
+      let data = {
+        action: 'find_flights',
+        departure: state.departure,
+        destination: state.destination,
+        date: state.date,
+        returnDate: state.returnDate,
+        awnser: inputText,
+      }
       socket.send(JSON.stringify(data));
     } else if (step === 'create_activities' && status === true) {
       setMessages([...messages, newMessage]);
