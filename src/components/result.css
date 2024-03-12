@@ -13,6 +13,11 @@
     width: 100vw;
 }
 
+.cards_div {
+    display: flex;
+    flex-direction: row;
+}
+
 .city {
     font-family: 'Titan One', sans-serif;
     color: white;
@@ -33,6 +38,10 @@
     box-shadow: -6px 6px 0px 6px #2cd4d4;
     max-width: 600px;
     width: 90%;
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow-y: auto;
+    max-height: 80vh;
 }
 
 .activity_header { 
@@ -129,6 +138,10 @@
     box-shadow: -6px 6px 0px 6px #c98a75;
     max-width: 600px;
     width: 90%;
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow-y: auto;
+    max-height: 80vh;
 }
 
 .meals_body {
@@ -201,4 +214,131 @@
     font-size: 0.8em;
     opacity: 0.8;
     color: #082627;
+}
+
+.flights_div {
+    background-color: #a78232;
+    padding-left: 1vh;
+    padding-right: 1vh;
+    box-shadow: -6px 6px 0px 6px #e0bb6a;
+    max-width: 600px;
+    width: 90%;
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+.flights_header_title {
+    font-family: 'arial', sans-serif;
+    font-weight: bold;
+    color: #550000;
+    Font-size: 2em;
+    margin-top: 10px;
+}
+
+.flights_infos {
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    background: #c1b6b6;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 15px;
+    margin-top: 0.8vb;
+    border-radius: 10px;  
+}
+
+.flights_infos_bottom {
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+    background: #c1b6b6;
+    margin-bottom: 0.8vb;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 15px;
+    border-radius: 10px; 
+}
+
+.flights_logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
+.flights_infos_header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 1.5vh;
+}
+
+.flights_logo_div_name {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.cities_flight_names_acronym {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1vh;
+}
+
+.cities_flight_names_acronym_departure {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cities_flight_names_acronym_destination {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap-reverse;
+    justify-content: space-between;
+}
+
+.flight_name {
+    font-size: 1rem;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;   
+}
+
+.flights_number {
+    color: #646464;
+  font-size: 0.9rem;
+  font-weight: lighter;
+  font-family: Helvetica, arial, sans-serif;
+}
+
+.flight_acronym {
+    font-size: 2rem;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.texto-direita {
+    margin-left: auto;
+    text-align: right;
+}
+
+.mid_center_align {
+    margin: 0 auto;
+}
+
+.flight_time {
+    font-size: 0.8rem;
+    opacity: 0.4;
+    text-align: center;
+}
+
+.flight_stops {
+    font-size: 1rem;
+    opacity: 0.6;
+    text-align: center;
+}
+
+.flight_hour {
+    margin-top: 2vh;
+    font-size: 2rem;
+    opacity: 0.8;
 }

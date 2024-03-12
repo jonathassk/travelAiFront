@@ -9,6 +9,7 @@ class AppState {
     flights: any[] = [];
     hotels: any[] = [];
     activities: any = {};
+    meals: any = {};
     city: string = '';
     country: string = '';
     days: number = 0;
@@ -30,6 +31,7 @@ class AppState {
         days: observable,
         value: observable,
         hasFlight: observable,
+        meals: observable,
         setDeparture: action,
         setDestination: action,
         filterDeparture: action,
@@ -42,7 +44,8 @@ class AppState {
         setActivities: action,
         setFlights: action,
         setHasFlight: action,
-        setCountry: action
+        setCountry: action,
+        setMeals: action
     });
     }
 
@@ -96,6 +99,10 @@ class AppState {
 
     setCountry(country: string) {
         this.country = country;
+    }
+
+    setMeals(meals: any) {
+        this.meals = meals;
     }
 
 }

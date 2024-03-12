@@ -14,7 +14,7 @@ function ChatLogic() {
   const [status, setStatus] = useState('');
   const [step, setStep] = useState('');
 
-  const [state, dispatch] = useReducer(reducer, {name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hotels: [], activities: [], city: "", country: "", days: 0, value: 0, hasFlight: null});
+  const [state, dispatch] = useReducer(reducer, {name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hotels: [], activities: [], meals: {}, city: "", country: "", days: 0, value: 0, hasFlight: null});
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -40,14 +40,12 @@ function ChatLogic() {
     socket.onmessage = (event) => {
       if (event.data.trim() === '') return;
       let newMessage;
-
       try {
         const jsonData = JSON.parse(event.data);
-        
-        if (jsonData && jsonData.step) setStep(jsonData.step);
-        if (jsonData && jsonData.status) setStatus(jsonData.status);
+        if (jsonData?.step) setStep(jsonData.step);
+        if (jsonData?.status) setStatus(jsonData.status);
 
-        if (jsonData && jsonData.message) {
+        if (jsonData?.message) {
           newMessage = {
             text: jsonData.message,
             sender: 'assistant',
@@ -88,9 +86,18 @@ function ChatLogic() {
           dispatch({ type: 'setActivities', payload: parsed });
           return;
         }
-        if (state.activities.length !== 0 && state.flights.length !== 0 && state.hasFlight === true || state.hasFlight === false && state.activities.length !== 0) {
-  
+        if (jsonData.status === "creating_activities" || jsonData.status === "creating_meals") {
+          jsonData.result = jsonData.result.replace(/\n/g, '');
+          const parseValue = JSON.parse(jsonData.result);
+          const parsed = JSON.parse(parseValue);
+          if (jsonData.status === "creating_activities") dispatch({ type: 'setActivities', payload: parsed });
+          if (jsonData.status === "creating_meals") dispatch({ type: 'setMeals', payload: parsed });
         }
+
+        
+  //      if (state.activities.length !== 0 && state.flights.length !== 0 && state.hasFlight === true || state.hasFlight === false && state.activities.length !== 0) {
+
+    //    }
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
         return;
@@ -139,6 +146,9 @@ function ChatLogic() {
       case 'setActivities':
         AppState.setActivities(action.payload);
         return { ...state, activities: action.payload };
+      case 'setMeals':
+        AppState.setMeals(action.payload);
+        return { ...state, meals: action.payload };
       case 'setFlights':
         AppState.setFlights(action.payload);
         return { ...state, flights: action.payload };
@@ -209,13 +219,13 @@ function ChatLogic() {
         awnser: inputText,
       }
       setAirport(inputText);
-    } else if (step === "flights" && status === true) {
+    } else if (step === "flights" && status) {
       data = {
         action: 'find_cities',
         departure: null,
         awnser: inputText,
       }
-    } else if (step === "flights" && status === false) {
+    } else if (step === "flights" && status == false) {
       data = {
         action: 'find_activities',
         awnser: inputText,
