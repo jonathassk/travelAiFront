@@ -70,7 +70,7 @@ export default function ResultPage() {
 
   return (
       <div className='backResult'>
-        <p className='city'>{AppState.city}</p>
+        <p className='city'>{AppState.activities?.travel_plan?.destination}</p>
         <p className='country'>{AppState.activities?.travel_plan?.country}</p>
         <div className='cards_div'>
           {AppState.flights ? (
@@ -129,7 +129,7 @@ export default function ResultPage() {
                         <p className='activity_name'> {activity.activity}</p>
                         <p className='activity_price'>{activity.price} USD</p>
                       </div>
-                      <p className='activity_site'> {activity.site.startsWith("https://[") ? "" : activity.site} </p>
+                      <p className='activity_site'> {activity.address} </p>
                     </div>
                   ))}
                 </div>
@@ -149,7 +149,7 @@ export default function ResultPage() {
                         <p className='meals_name'> {meal.meal} </p>
                         <p className='meals_price'>{meal.price} USD</p>
                       </div>
-                      <p className='meals_site'> {!meal.site.startsWith("https://[") ? meal.site : ""} </p>
+                      <p className='meals_site'> {meal.address} </p>
                     </div>
                   ))}
                 </div>
