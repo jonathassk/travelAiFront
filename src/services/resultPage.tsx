@@ -70,47 +70,61 @@ export default function ResultPage() {
 
   return (
       <div className='backResult'>
+        <div className='alert'>
+          <p style={{fontWeight: '500'}}>Na versao beta, estamos limitando a quantidade de dias de atividades e refeições em cinco.</p>
+        </div>
         <p className='city'>{AppState.activities?.travel_plan?.destination}</p>
         <p className='country'>{AppState.activities?.travel_plan?.country}</p>
         <div className='cards_div'>
-          {AppState.flights ? (
+          {AppState.flights.length > 0 ? (
             <div className='flights_div'>
               <p className='flights_header_title'>Flights</p>
                 {AppState.flights?.map((info, i) => (
                 <div key={i}>
-                  <div className='flights_infos'>
+                  {info.legs.map((leg, i) => (
+                    
+                    <div className='flights_infos' style={{ borderRadius: i === 0 ? '10px 10px 0 0' : '0'}} key={leg.id}>
                     <div style={{marginBottom: 0}} className='div_infos_group'>
                       <div className='flights_infos_header'>
                         <div className='flights_logo_div_name'>
-                          <img src={info.legs[0].carriers.marketing[0].logoUrl} alt='logo' className='flights_logo' />
-                          <p className='flight_name'>{info.legs[0].carriers.marketing[0].name}</p>
+                          <img src={leg.carriers.marketing[0].logoUrl} alt='logo' className='flights_logo' />
+                          <p className='flight_name'>{leg.carriers.marketing[0].name}</p>
                         </div>
-                        <p className='flights_number'>{info.legs[0]?.segments?.operatingCarrier?.alternateId}{info.legs[0]?.segments?.flightNumber}</p>
+                        <p className='flights_number'>{leg?.segments?.operatingCarrier?.alternateId}{leg?.segments?.flightNumber}</p>
                       </div>
 
                       <div className='cities_flight_names_acronym'>
                         <div className='cities_flight_names_acronym_departure'>
-                          <p className='flight_acronym'>{info.legs[0].origin.displayCode}</p>
-                          <p className='flight_city_gray'>{info.legs[0].origin.name}</p>
+                          <p className='flight_acronym'>{leg.origin.displayCode}</p>
+                          <p className='flight_city_gray'>{leg.origin.name}</p>
                           
                         </div>
                         <div className='mid_center_align'>
-                          <p className='flight_stops'>{info.legs[0].stopCount} stops</p>
+                          <p className='flight_stops'>{leg.stopCount} stops</p>
                           <img src={Plane} alt='plane_silluette' style={{width: "20px", marginLeft: "15px"}}/>
                         </div>
                         <div className='cities_flight_names_acronym_destination texto-direita'>
-                          <p className='flight_acronym'>{info.legs[0].destination.displayCode}</p>
-                          <p className='flight_city_gray'>{info.legs[0].destination.name}</p>
+                          <p className='flight_acronym'>{leg.destination.displayCode}</p>
+                          <p className='flight_city_gray'>{leg.destination.name}</p>
                           
                         </div>
                       </div>
-                      <p className='flight_hour'>{info.legs[0].departure.substring(11, info.legs[0].departure.length - 3)}</p>
-                      <p className='flight_hour'>{info.legs[0].arrival.substring(11, info.legs[0].departure.length - 3)}</p>
+                      <div className='hours_flights_div'>
+                      <p className='flight_hour'>{leg.departure.substring(11, leg.departure.length - 3)}</p>
+                      <p className='flight_hour'>{leg.arrival.substring(11, leg.departure.length - 3)}</p>
+                      </div>
+                      <div className='hours_flights_div'>
+                      <p className='flight_date'>{leg.departure.substring(8,10)}/{leg.departure.substring(5,7)}/{leg.departure.substring(0,4)}</p>
+                      <p className='flight_date'>{leg.arrival.substring(8,10)}/{leg.arrival.substring(5,7)}/{leg.arrival.substring(0,4)}</p>
+                      </div>
                     </div>
                   </div>
+                  ))}
+                  
                   <div className='flights_infos_bottom'>
                     <p className='flights_price'>{info.price.formatted}</p>
-                    <p className='flights_site'> skyscanner.com</p>
+                    {info.tags?.includes('cheapest') ? <p className='flights_tags cheapest_tag'>Mais Barato</p> : null}
+                    {info.tags?.includes('shortest') ? <p className='flights_tags fastest_tag'>Mais Rapido</p> : null}
                   </div>
                 </div>
                 ))}

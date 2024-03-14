@@ -46,7 +46,7 @@ function ChatLogic() {
         if (jsonData?.step) setStep(jsonData.step);
         if (jsonData?.status) setStatus(jsonData.status);
 
-        if (jsonData?.message) {
+        if (jsonData?.message && jsonData?.message !== 'Endpoint request timed out') {
           newMessage = {
             text: jsonData.message,
             sender: 'assistant',
@@ -108,9 +108,9 @@ function ChatLogic() {
         
 
         
-  //      if (state.activities.length !== 0 && state.flights.length !== 0 && state.hasFlight === true || state.hasFlight === false && state.activities.length !== 0) {
-
-    //    }
+        if (AppState.activities.length > 0 && AppState.meals.length > 0 && AppState.flights.length > 0) {
+          console.log("Todas as informações foram coletadas com sucesso!");
+        }
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
         return;
@@ -338,6 +338,8 @@ function ChatLogic() {
     }
   };
 
+  
+  
   return (
     <ChatView
       text={text}
@@ -349,6 +351,7 @@ function ChatLogic() {
       handleKeyDown={handleKeyDown}
     />
   );
+  
 }
 
 export default ChatLogic;

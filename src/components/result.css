@@ -53,6 +53,7 @@
 }
 
 .activity_header_title {
+    margin-bottom: 10px;
     font-family: 'arial', sans-serif;
     font-weight: bold;
     color: #082627;
@@ -152,6 +153,7 @@
 }
 
 .meals_header_title {
+    margin-bottom: 10px;
     font-family: 'arial', sans-serif;
     font-weight: bold;
     color: #550000;
@@ -235,6 +237,7 @@
     color: #550000;
     Font-size: 2em;
     margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .flights_infos {
@@ -243,18 +246,18 @@
     padding-left: 5px;
     padding-right: 5px;
     padding-top: 15px;
-    margin-top: 0.8vb;
-    border-radius: 10px;  
 }
 
 .flights_infos_bottom {
     box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
     background: #c1b6b6;
     margin-bottom: 0.8vb;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-top: 15px;
-    border-radius: 10px; 
+    padding: 5px;
+    border-radius: 0 0 10px 10px;
+    display: flex; 
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: last baseline;
 }
 
 .flights_logo {
@@ -338,7 +341,67 @@
 }
 
 .flight_hour {
-    margin-top: 2vh;
     font-size: 2rem;
     opacity: 0.8;
+}
+
+.flight_date {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.alert {
+    opacity: 0;
+    position: fixed;
+    margin-top: 10px;
+    margin-right: 10px;
+    padding: 10px;
+    top: 0;
+    right: 0;
+    background-color: aliceblue;
+    border-radius: 10px;
+    width: 200px;
+    text-align: center;
+    animation: alertAnimation 7s;
+}
+
+@keyframes alertAnimation {
+    0% {
+        opacity: 0;
+        margin-top: 0;
+    }
+    20% {
+        opacity: 1;
+        margin-top: 15px;
+    }
+    80% {
+        opacity: 1;
+        margin-top: 15px;
+    }
+    100% {
+        opacity: 0;
+        margin-top: 30px;
+    }
+}
+
+.cheapest_tag {
+    background-color: #108641;
+    color: white;
+}
+
+.fastest_tag {
+    background-color: #0a385e;
+    color: white;
+}
+
+.flights_tags {
+    padding: 5px;
+    text-align: center;
+    border-radius: 50px;
+}
+
+.hours_flights_div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }

@@ -1,7 +1,9 @@
 import React from 'react';
 import user_image from '../147144.png';
 import ChatComponentMessage from '../chatComponentMessage';
-import { Navigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+import AppState from '../services/mobxState.tsx';
+
 
 function ChatView({
   text,
