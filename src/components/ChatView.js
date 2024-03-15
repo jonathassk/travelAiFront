@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import user_image from '../147144.png';
 import ChatComponentMessage from '../chatComponentMessage';
 import { Link } from "react-router-dom";
 import AppState from '../services/mobxState.tsx';
+import PropTypes from 'prop-types';
+
 
 
 function ChatView({
@@ -12,8 +14,13 @@ function ChatView({
   inputText,
   setInputText,
   handleSendClick,
-  handleKeyDown
+  handleKeyDown,
+  endMessageDiv,
+  messagesEndRef
 }) {
+
+
+
   return (
     <div className='chat'>
       <div className='chat_header'>
@@ -34,6 +41,7 @@ function ChatView({
             time={message.timestamp}
           />
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <div className='send_message_div'>
         <input
@@ -44,6 +52,7 @@ function ChatView({
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}
         />
+        <div ref={endMessageDiv} />
         <button className='chat_send_button' onClick={handleSendClick}>SEND</button>
       </div>
     </div>

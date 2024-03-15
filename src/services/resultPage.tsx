@@ -1,7 +1,9 @@
-import React  from 'react';
+import React, { useRef }  from 'react';
 import '../components/result.css'
 import AppState from '../services/mobxState.tsx';
+import { Link, useNavigate } from "react-router-dom";
 const Plane = require('../plane.png');
+
 
 type CounterAction =
   | { type: "reset" }
@@ -67,7 +69,7 @@ function stateReducer(state: State, action: CounterAction): State {
 }
 
 export default function ResultPage() {
-
+  const navigate = useNavigate();
   return (
       <div className='backResult'>
         <div className='alert'>
@@ -174,6 +176,7 @@ export default function ResultPage() {
             ))}
         </div>
       </div>
+      <button style={{ position: 'fixed', bottom: '0', right: '0', margin: '20px', padding: '10px', borderRadius: '10px', backgroundColor: 'white', border: 'none', boxShadow: '0px 0px 10px 0px rgba(0,0,0,0.75)'}} onClick={() => <Link to={"/"} />}>create new planning</button>
     </div>
   );
 };

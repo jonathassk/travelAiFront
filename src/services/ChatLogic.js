@@ -24,10 +24,17 @@ function ChatLogic() {
 
   let lastMessage = useRef(null);
   let stepsApplied = useRef({flights: false, activities: false, meals: false})
-
+  const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
   
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   useEffect(() => {
     setMessages([
       {
@@ -358,6 +365,7 @@ function ChatLogic() {
       setInputText={setInputText}
       handleSendClick={handleSendClick}
       handleKeyDown={handleKeyDown}
+      messagesEndRef={messagesEndRef}
     />
   );
   
