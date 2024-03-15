@@ -69,7 +69,10 @@ function ChatLogic() {
         }
 
         if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]); 
-        if (jsonData.step === "create_activities" && jsonData.status === true) dispatch({ type: 'setHasFlight', payload: false});
+        if (jsonData.step === "create_activities" && jsonData.status === true) { 
+          dispatch({ type: 'setHasFlight', payload: false});
+          stepsApplied.current.flights = true;
+        }
         if (jsonData.step === "flights" && jsonData.status === true) dispatch({ type: 'setHasFlight', payload: true})
         if (jsonData.step === "format_date" && jsonData.status === "waiting_return_date") dispatch({ type: 'setDate', payload: jsonData.date });
         if (jsonData.step === "choose_flights" && jsonData.status === "choosing_flight") dispatch({ type: 'setFlights', payload: jsonData.flights });
