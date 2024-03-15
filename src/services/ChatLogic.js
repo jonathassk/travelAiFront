@@ -1,7 +1,8 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 import ChatView from '../components/ChatView';
 import AppState from '../services/mobxState.tsx';
 import { useTypingEffect } from '../utils/typingeffect';
+import { useNavigate } from "react-router-dom";
 
 
 const URL = 'wss://tt8v0tezs8.execute-api.sa-east-1.amazonaws.com/production/';
@@ -13,7 +14,6 @@ function ChatLogic() {
   const [name, setName] = useState('');
   const [status, setStatus] = useState('');
   const [step, setStep] = useState('');
-
   const [state, dispatch] = useReducer(reducer, {name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hotels: [], activities: [], meals: {}, city: "", country: "", days: null, value: null, hasFlight: null});
 
   const [messages, setMessages] = useState([]);
@@ -22,9 +22,13 @@ function ChatLogic() {
   const [airport, setAirport] = useState('');
   const [departure, setDeparture] = useState([]);
 
+  let lastMessage = useRef(null);
+  let stepsApplied = useRef({flights: false, activities: false, meals: false})
+
+  const navigate = useNavigate();
+
   
   useEffect(() => {
-    
     setMessages([
       {
         text: 'Olá, sou seu assistente de viagem, voce poderia me informar seu nome?',
@@ -42,11 +46,11 @@ function ChatLogic() {
       let newMessage;
       try {
         const jsonData = JSON.parse(event.data);
-        console.log(jsonData)
+        if (lastMessage.current === jsonData.message) return;
+        lastMessage.current = jsonData.message;
         if (jsonData?.step) setStep(jsonData.step);
         if (jsonData?.status) setStatus(jsonData.status);
-
-        if (jsonData?.message && jsonData?.message !== 'Endpoint request timed out') {
+        if (jsonData?.message) {
           newMessage = {
             text: jsonData.message,
             sender: 'assistant',
@@ -61,7 +65,6 @@ function ChatLogic() {
         if (jsonData.step === "create_activities" && jsonData.status === true) dispatch({ type: 'setHasFlight', payload: false});
         if (jsonData.step === "flights" && jsonData.status === true) dispatch({ type: 'setHasFlight', payload: true})
         if (jsonData.step === "format_date" && jsonData.status === "waiting_return_date") dispatch({ type: 'setDate', payload: jsonData.date });
-        
         if (jsonData.step === "choose_flights" && jsonData.status === "choosing_flight") dispatch({ type: 'setFlights', payload: jsonData.flights });
         if (jsonData.step === "create_activities" && jsonData.status === "completed_activity") dispatch({ type: 'setActivities', payload: jsonData.value });
         if (jsonData.step === "create_activities" && jsonData.status === 'waiting_quantity_days') dispatch({ type: 'setCity', payload: jsonData.value });
@@ -101,15 +104,21 @@ function ChatLogic() {
               days: parsed.travel_plan.duration,
               value: parsed.travel_plan.budget,
             }
+            stepsApplied.current.activities = true;
             socket.send(JSON.stringify(data));
           }
-          if (jsonData.status === "creating_meals") dispatch({ type: 'setMeals', payload: parsed });
+          if (jsonData.status === "creating_meals") {
+            dispatch({ type: 'setMeals', payload: parsed });
+            stepsApplied.current.meals = true;
+          }
         }
-        
-
-        
-        if (AppState.activities.length > 0 && AppState.meals.length > 0 && AppState.flights.length > 0) {
-          console.log("Todas as informações foram coletadas com sucesso!");
+        if (jsonData.status === "choosing_flight") {
+          stepsApplied.current.flights = true;
+        }
+        if (stepsApplied.current.flights && stepsApplied.current.activities && stepsApplied.current.meals) {
+          setInterval(() => {
+            navigate("/result"); 
+          }, 5000);
         }
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
@@ -126,7 +135,7 @@ function ChatLogic() {
     };
 
     return () => {
-      socket.close();
+      socket.close(); 
     };
   }, []);
 

@@ -45,7 +45,6 @@ function ChatView({
           onKeyDown={handleKeyDown}
         />
         <button className='chat_send_button' onClick={handleSendClick}>SEND</button>
-        <Link to="/result">Result</Link>
       </div>
     </div>
   );

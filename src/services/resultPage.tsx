@@ -71,7 +71,7 @@ export default function ResultPage() {
   return (
       <div className='backResult'>
         <div className='alert'>
-          <p style={{fontWeight: '500'}}>Na versao beta, estamos limitando a quantidade de dias de atividades e refeições em cinco.</p>
+          <p style={{fontWeight: '500'}}>Na versao beta, estamos limitando a quantidade de dias de atividades e refeições em 10 dias.</p>
         </div>
         <p className='city'>{AppState.activities?.travel_plan?.destination}</p>
         <p className='country'>{AppState.activities?.travel_plan?.country}</p>
@@ -123,8 +123,10 @@ export default function ResultPage() {
                   
                   <div className='flights_infos_bottom'>
                     <p className='flights_price'>{info.price.formatted}</p>
-                    {info.tags?.includes('cheapest') ? <p className='flights_tags cheapest_tag'>Mais Barato</p> : null}
-                    {info.tags?.includes('shortest') ? <p className='flights_tags fastest_tag'>Mais Rapido</p> : null}
+                    <div style={{display: 'flex', flexDirection: 'row'}}>
+                    {info.tags?.includes('cheapest') ? <p className='flights_tags cheapest_tag'>cheapest</p> : null}
+                    {info.tags?.includes('shortest') ? <p className='flights_tags fastest_tag'>shortest</p> : null}
+                    </div>
                   </div>
                 </div>
                 ))}

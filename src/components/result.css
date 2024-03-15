@@ -341,13 +341,14 @@
 }
 
 .flight_hour {
-    font-size: 2rem;
+    font-size: 1.6rem;
     opacity: 0.8;
 }
 
 .flight_date {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     opacity: 0.8;
+    margin-bottom: 3px;
 }
 
 .alert {
@@ -398,6 +399,8 @@
     padding: 5px;
     text-align: center;
     border-radius: 50px;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .hours_flights_div {
