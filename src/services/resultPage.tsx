@@ -176,7 +176,7 @@ export default function ResultPage() {
             ))}
         </div>
       </div>
-      <button style={{ position: 'fixed', bottom: '0', right: '0', margin: '20px', padding: '10px', borderRadius: '10px', backgroundColor: 'white', border: 'none', boxShadow: '0px 0px 10px 0px rgba(0,0,0,0.75)'}} onClick={() => <Link to={"/"} />}>create new planning</button>
+      <button style={{ position: 'fixed', top: '0', left: '0', margin: '20px', padding: '10px', borderRadius: '10px', backgroundColor: 'white', border: 'none', boxShadow: '0px 0px 10px 0px rgba(0,0,0,0.75)'}} onClick={() => <Link to={"/"} />}>create new planning</button>
     </div>
   );
 };

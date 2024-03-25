@@ -7,45 +7,59 @@ class AppState {
     date: string = '';
     returnDate: string = '';
     flights: any[] = [];
+    hasFlight: boolean = false;
     hotels: any[] = [];
     activities: any = {};
     meals: any = {};
-    city: string = '';
+    cityOrigin: string = '';
+    cityDestination: string = '';
     country: string = '';
     days: number = 0;
     value: number = 0;
-    hasFlight: boolean | null = null;
-
+    currency: string = '';
+    airport_departure: string = '';
+    airport_destination: string = '';
+    messages: string[] = [];
     constructor() {
     makeObservable(this, {
         name: observable,
         departure: observable,
         destination: observable,
+        hasFlight: observable,
         date: observable,
         returnDate: observable,
         flights: observable,
         hotels: observable,
         activities: observable,
-        city: observable,
+        cityOrigin: observable,
+        cityDestination: observable,
         country: observable,
         days: observable,
         value: observable,
-        hasFlight: observable,
+        currency: observable,
         meals: observable,
+        messages: observable,
+        airport_departure: observable,
+        airport_destination: observable,
         setDeparture: action,
         setDestination: action,
         filterDeparture: action,
         setDate: action,
         setReturnDate: action,
         setName: action,
-        setCity: action,
+        setCityOrigin: action,
+        setCityDestination: action,
         setDays: action,
         setValue: action,
+        setCurrency: action,
         setActivities: action,
-        setFlights: action,
         setHasFlight: action,
+        setFlights: action,
         setCountry: action,
-        setMeals: action
+        setMeals: action,
+        addMessage: action,
+        setAirportDeparture: action,
+        setAirportDestination: action,
     });
     }
 
@@ -73,10 +87,14 @@ class AppState {
         this.name = name;
     }
 
-    setCity(city: string) {
-        this.city = city;
+    setCityOrigin(cityOrigin: string) {
+        this.cityOrigin = cityOrigin;
     }
-
+    
+    setCityDestination(cityDestination: string) {
+        this.cityDestination = cityDestination;
+    }
+    
     setDays(days: number) {
         this.days = days;
     }
@@ -105,6 +123,21 @@ class AppState {
         this.meals = meals;
     }
 
+    addMessage(message: string) {
+        this.messages[this.messages.length] = message;
+    }
+
+    setCurrency(currency: string) {
+        this.currency = currency;
+    }
+
+    setAirportDeparture(airport: string) {
+        this.airport_departure = airport;
+    }
+
+    setAirportDestination(airport: string) {
+        this.airport_destination = airport;
+    }
 }
 
 export default new AppState();

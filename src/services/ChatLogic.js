@@ -2,35 +2,31 @@ import React, { useEffect, useReducer, useRef, useState } from 'react';
 import ChatView from '../components/ChatView';
 import AppState from '../services/mobxState.tsx';
 import { useTypingEffect } from '../utils/typingeffect';
-import { useNavigate } from "react-router-dom";
+import { json, useNavigate } from "react-router-dom";
+import { set, toJS } from 'mobx';
 
 
-const URL = 'wss://tt8v0tezs8.execute-api.sa-east-1.amazonaws.com/production/';
+const URL = 'wss://o9ypfzpqv3.execute-api.sa-east-1.amazonaws.com/beta/';
 const socket = new WebSocket(URL);
 function ChatLogic() {
   const text = useTypingEffect("I'm your travel assistant", 20);
   const text2 = useTypingEffect("mr. flight", 20);
 
-  const [name, setName] = useState('');
-  const [status, setStatus] = useState('');
-  const [step, setStep] = useState('');
-  const [state, dispatch] = useReducer(reducer, {name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hotels: [], activities: [], meals: {}, city: "", country: "", days: null, value: null, hasFlight: null});
+  const [state, dispatch] = useReducer(reducer, { name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hasFlight: false, hotels: [], activities: [], meals: {}, cityOrigin: "", cityDestination: "", country: "", days: null, value: null, currency: '', messagesAI: [] });
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isConnected, setIsConnected] = useState(false);
-  const [airport, setAirport] = useState('');
-  const [departure, setDeparture] = useState([]);
 
   let lastMessage = useRef(null);
-  let stepsApplied = useRef({flights: false, activities: false, meals: false})
+  let stepsApplied = useRef({ flights: false, activities: false, meals: false })
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-  
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -38,103 +34,67 @@ function ChatLogic() {
   useEffect(() => {
     setMessages([
       {
-        text: 'Olá, sou seu assistente de viagem, voce poderia me informar seu nome?',
+        // text: 'Hello, I will be your travel assistant, helping you plan the best trip possible. First, please tell me your name.',
+        text: 'Ola, serei seu assistente de viagem, irei estar te auxiliando a planejar a melhor viagem possivel, inicialmente, me diga seu nome por favor',
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString()
       }
     ]);
-    
+    createMessages();
     socket.onopen = () => {
       console.log('connected on websocket server!');
     }
 
     socket.onmessage = (event) => {
-      if (event.data.trim() === '') return;
       let newMessage;
       try {
         const jsonData = JSON.parse(event.data);
-        if (lastMessage.current === jsonData.message) return;
-        lastMessage.current = jsonData.message;
-        if (jsonData?.step) setStep(jsonData.step);
-        if (jsonData?.status) setStatus(jsonData.status);
-        if (jsonData?.message) {
+        console.log(jsonData)
+        let jsonExtracted;
+        if (jsonData?.messages) jsonExtracted = extractJson(jsonData?.messages[jsonData.messages.length - 1]?.content);
+        if (!jsonExtracted && jsonData?.messages) {
+          AppState.addMessage({ role: 'assistant', content: jsonData?.messages[jsonData.messages.length - 1]?.content });
           newMessage = {
-            text: jsonData.message,
+            text: jsonData.messages[jsonData.messages.length - 1].content,
             sender: 'assistant',
             timestamp: new Date().toLocaleTimeString(),
           };
-        } else {
-          console.log("A mensagem não contém um campo 'message' válido.");
-          return;
+          setMessages(prevMessages => [...prevMessages, newMessage]);
+        } else if (jsonExtracted?.airport_included) {
+          newMessage = {
+            text: "iremos buscar os aeroportos mais proximos de sua origem, aguarde um momento!",
+            sender: 'assistant',
+            timestamp: new Date().toLocaleTimeString(),
+          };
+          setMessages(prevMessages => [...prevMessages, newMessage]);
+          let data = {
+            action: 'find_airport',
+            cityOrigin: jsonExtracted?.origin?.name_city,
+            cityDestination: jsonExtracted?.arrival?.name_city
+          };
+          socket.send(JSON.stringify(data));
         }
-
-        if (newMessage.text !== '') setMessages(prevMessages => [...prevMessages, newMessage]); 
-        if (jsonData.step === "create_activities" && jsonData.status === true) { 
-          dispatch({ type: 'setHasFlight', payload: false});
-          stepsApplied.current.flights = true;
-        }
-        if (jsonData.step === "flights" && jsonData.status === true) dispatch({ type: 'setHasFlight', payload: true})
-        if (jsonData.step === "format_date" && jsonData.status === "waiting_return_date") dispatch({ type: 'setDate', payload: jsonData.date });
-        if (jsonData.step === "choose_flights" && jsonData.status === "choosing_flight") dispatch({ type: 'setFlights', payload: jsonData.flights });
-        if (jsonData.step === "create_activities" && jsonData.status === "completed_activity") dispatch({ type: 'setActivities', payload: jsonData.value });
-        if (jsonData.step === "create_activities" && jsonData.status === 'waiting_quantity_days') dispatch({ type: 'setCity', payload: jsonData.value });
-        if (jsonData.step === "create_activities" && jsonData.status === "waiting_value") dispatch({ type: 'setDays', payload: jsonData.value });
-        if (jsonData.step === "find_country" && jsonData.status === "completed") dispatch({ type: 'setCountry', payload: jsonData.country });
-        if (jsonData.step === "create_activities" && jsonData.status === "completed_activity") {
-          jsonData.result = jsonData.value.replace(/\n/g, '');
-          const parseValue = JSON.parse(jsonData.result);
-          const parsed = JSON.parse(parseValue);
-          dispatch({ type: 'setValue', payload: jsonData.price });
-          dispatch({ type: 'setActivities', payload: parsed });
-          return;
-        }
-        if (jsonData.status === "completed_date") dispatch({ type: 'setReturnDate', payload: jsonData.date });
-        if (jsonData.status === "choosing_airport_departure" || jsonData.status === "completed_departure") {
-          const editedDeparture = cityData(jsonData.departure);
-          dispatch({ type: 'setDeparture', payload: jsonData.departure });
-          if (jsonData.status === "choosing_airport_departure") createMessageOptionsAirports(editedDeparture);
-          return;
-        }
-        if (jsonData.status === "completed_destination" || jsonData.status === "choosing_airport_destination") {
-          const editedDestination = cityData(jsonData.destination);
-          dispatch({ type: 'setDestination', payload: jsonData.destination });
-          if (jsonData.status === "choosing_airport_destination") createMessageOptionsAirports(editedDestination);
-          return;
-        }
-        
-        if (jsonData.status === "creating_activities" || jsonData.status === "creating_meals") {
-          jsonData.result = jsonData.result.replace(/\n/g, '');
-          const parseValue = JSON.parse(jsonData.result);
-          const parsed = JSON.parse(parseValue);
-          if (jsonData.status === "creating_activities") {
-            dispatch({ type: 'setActivities', payload: parsed });
-            const data = {
-              action: 'find_meals',
-              city: parsed.travel_plan.destination,
-              days: parsed.travel_plan.duration,
-              value: parsed.travel_plan.budget,
+        if (jsonData.cityData) {
+          if (jsonData.cityData && state.departure.length === 0) {
+            dispatch({ type: 'setDestination', payload: jsonData.result.city2.closest_city_with_airport });
+            dispatch({ type: 'setDeparture', payload: jsonData.cityData });
+            if (jsonData.cityData.length > 1) {
+              createMessageOptionsAirports(jsonData.cityData);
             }
-            stepsApplied.current.activities = true;
-            socket.send(JSON.stringify(data));
           }
-          if (jsonData.status === "creating_meals") {
-            dispatch({ type: 'setMeals', payload: parsed });
-            stepsApplied.current.meals = true;
+
+          if (stepsApplied.current.flights && stepsApplied.current.activities && stepsApplied.current.meals) {
+            setInterval(() => {
+              navigate("/result");
+            }, 5000);
           }
-        }
-        if (jsonData.status === "choosing_flight") {
-          stepsApplied.current.flights = true;
-        }
-        if (stepsApplied.current.flights && stepsApplied.current.activities && stepsApplied.current.meals) {
-          setInterval(() => {
-            navigate("/result"); 
-          }, 5000);
         }
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
         return;
-      }      
-    };
+      }
+    }
+
 
     socket.onclose = () => {
       setIsConnected(false);
@@ -145,7 +105,7 @@ function ChatLogic() {
     };
 
     return () => {
-      socket.close(); 
+      socket.close();
     };
   }, []);
 
@@ -166,15 +126,21 @@ function ChatLogic() {
       case 'setName':
         AppState.setName(action.payload);
         return { ...state, name: action.payload };
-      case 'setCity':
-        AppState.setCity(action.payload);
-        return { ...state, city: action.payload };
+      case 'setCityOrigin':
+        AppState.setCityOrigin(action.payload);
+        return { ...state, cityOrigin: action.payload };
+      case 'setCityDestination':
+        AppState.setCityDestination(action.payload);
+        return { ...state, cityDestination: action.payload };
       case 'setDays':
         AppState.setDays(action.payload);
         return { ...state, days: action.payload };
-      case 'setValue': 
+      case 'setValue':
         AppState.setValue(action.payload);
         return { ...state, value: action.payload };
+      case 'setCurrency':
+        AppState.setCurrency(action.payload);
+        return { ...state, currency: action.payload };
       case 'setActivities':
         AppState.setActivities(action.payload);
         return { ...state, activities: action.payload };
@@ -190,166 +156,96 @@ function ChatLogic() {
       case 'setCountry':
         AppState.setCountry(action.payload);
         return { ...state, country: action.payload };
+      case 'setmessagesAI':
+        return { ...state, messagesAI: action.payload };
       default:
         return state;
     }
   }
 
-  const cityData = data => {
-    let cont = 1;
-    const resultadoFront = data.map((item) => {
-      return {
-        skyId: item.skyId,
-        entityId: item.entityId,
-        entityType: item.navigation.entityType,
-        localizedName: item.navigation.localizedName,
-        suggestionTitle: item.presentation.suggestionTitle,
-        cont: cont++,
+  const createMessage = () => {
+
+  }
+
+  const extractJson = (message) => {
+    let startIndex = message.indexOf('{');
+    let endIndex = message.lastIndexOf('}') + 1;
+    let jsonData;
+    if (startIndex !== -1 && endIndex !== -1) {
+      let jsonString = message.substring(startIndex, endIndex);
+      jsonData = JSON.parse(jsonString);
+    }
+    if (jsonData?.name) {
+      dispatch({ type: 'setName', payload: jsonData?.name });
+      dispatch({ type: 'setDate', payload: jsonData?.date });
+      dispatch({ type: 'setReturnDate', payload: jsonData?.return_date });
+      dispatch({ type: 'setDays', payload: differenceInDays(jsonData?.date, jsonData?.return_date) });
+      dispatch({ type: 'setValue', payload: jsonData?.daily_budget });
+      dispatch({ type: 'setCityOrigin', payload: jsonData?.origin?.name_city });
+      dispatch({ type: 'setCityDestination', payload: jsonData?.arrival?.name_city });
+      dispatch({ type: 'setCurrency', payload: jsonData?.currency });
+      if (jsonData?.airport_included) {
+        dispatch({ type: 'setHasFlight', payload: jsonData?.airport_included });
       }
-    });
-    return resultadoFront;
+    }
+    return jsonData;
+  }
+
+  const differenceInDays = (date1, date2) => {
+    const date1Obj = new Date(date1);
+    const date2Obj = new Date(date2);
+    const timeDiff = Math.abs(date2Obj.getTime() - date1Obj.getTime());
+    const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return diffDays;
   }
 
   const createMessageOptionsAirports = data => {
     try {
+      const newMessage = {
+        text: 'Escolha o aeroporto de origem, por favor utilize o codigo do aeroporto. Exemplo: LHR para Londres Heathrow, GRU para Guarulhos, bkk para bangkok etc. ou escreva "Outro" caso o seu aeroporto nao esteja nessa lista',
+        sender: 'assistant',
+        timestamp: new Date().toLocaleTimeString(),
+      };
+      setMessages(prevMessages => [...prevMessages, newMessage]);
+
       data.forEach(item => {
-        const options = `${item.skyId} - ${item.suggestionTitle}`;
+        const options = `${item.skyId} - ${item.presentation.suggestionTitle}`;
         const newMessage = {
           text: options, // Array de strings
           sender: 'assistant',
           timestamp: new Date().toLocaleTimeString(),
         };
         setMessages(prevMessages => [...prevMessages, newMessage]);
+
       });
-       
+
     } catch (error) {
       console.error("Erro ao fazer o parsing da string JSON:", error);
       return;
-    } 
+    }
   }
 
   const handleSendClick = () => {
     if (inputText === '') return;
-
-    let data = {};
     const newMessage = {
       text: inputText,
       sender: 'user',
       timestamp: new Date().toLocaleTimeString()
     };
-
+    const messageIa = {
+      "role": "user",
+      "content": inputText
+    }
+    AppState.addMessage(messageIa);
     setMessages([...messages, newMessage]);
-
-    if (name === '') {
-      handleNameInput(newMessage);
-      return 
-    }
-    
-    if (airport === '') {
-      data = {
-        action: 'ensure_have_airport',
-        awnser: inputText,
-      }
-      setAirport(inputText);
-    } else if (step === "flights" && status) {
-      data = {
-        action: 'find_cities',
-        departure: null,
-        awnser: inputText,
-      }
-    } else if (step === "flights" && !status) {
-      data = {
-        action: 'find_activities',
-        awnser: inputText,
-      }
-    } else if (step === 'airports_defined' && status === 'choosing_airport_departure') {
-      const filtered = state.departure.filter(item => item.skyId === inputText.toUpperCase())
-      if (filtered.length === 0) {
-        setMessages([...messages, newMessage, {
-          text: 'Por favor, escolha um aeroporto válido. (use as siglas indicadas)',
-          sender: 'assistant',
-          timestamp: new Date().toLocaleTimeString()
-        }]);
-        setInputText(''); 
-        return;
-      }
-      dispatch({ type: 'setDeparture', payload: filtered });
-      data = {
-        action: 'find_airport',
-        departure: filtered,
-        destination: null,
-      }
-    } else if (step === 'airports_defined' && status === 'completed_departure') {
-      data = {
-        action: 'find_cities',
-        awnser: inputText,
-        departure: departure,
-      }
-      setDeparture(inputText);
-    } else if (step === 'airports_defined' && status === 'choosing_airport_destination') {
-      const filtered = state.destination.filter(item => item.skyId === inputText.toUpperCase())
-      if (filtered.length === 0) {
-        setMessages([...messages, newMessage, {
-          text: 'Por favor, escolha um aeroporto válido. (use as siglas indicadas)',
-          sender: 'assistant',
-          timestamp: new Date().toLocaleTimeString()
-        }]);
-        return;
-      }
-      data = {
-        action: 'find_airport',
-        departure: departure,
-        destination: filtered,
-      }
-      socket.send(JSON.stringify(data));
-    } else if (step === 'airports_defined' && status === 'completed_destination') {
-      data = {
-        action: 'format_date',
-        awnser: inputText,
-        field: 'date'
-      }
-    } else if (step === 'format_date' && status === 'waiting_return_date') {
-      data = {
-        action: 'format_date',
-        awnser: inputText,
-        field: 'return_date'
-      }
-      if (inputText.toLowerCase() === 'no' || inputText.toLowerCase() === 'não' || inputText.toLowerCase() === 'nao' || inputText.toLowerCase() === 'n') {
-        data.awnser = null;
-      }
-      socket.send(JSON.stringify(data));  
-    } else if (step === "format_date" && status === "completed_date") {
-      data = {
-        action: 'find_flights',
-        departure: state.departure,
-        destination: state.destination,
-        date: state.date,
-        returnDate: state.returnDate,
-        awnser: inputText,
-      }
-    } else if (step === 'create_activities' && status) {
-      data = {
-        action: 'find_activities',
-        city: AppState.city,
-        days: state.days,
-        awnser: inputText,
-      }
-    }
+    dispatch({ type: 'setmessagesAI', payload: [...state.messagesAI, ...messages] });
+    let data = {
+      action: 'send_message',
+      messages: toJS(AppState.messages)
+    };
     socket.send(JSON.stringify(data));
-    setInputText(''); 
-  }
-
-  const handleNameInput = (newMessage) => {
-    setMessages([...messages, newMessage, {
-      text: `Olá ${inputText}, você gostaria de incluir os voos de ida e volta no seu orçamento de viagem?`,
-      sender: 'assistant',
-      timestamp: new Date().toLocaleTimeString()
-    }]);
-    setName(inputText);
-    dispatch({ type: 'setName', payload: inputText });
     setInputText('');
-  };
-
+  }
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -357,8 +253,23 @@ function ChatLogic() {
     }
   };
 
-  
-  
+  const createMessages = () => {
+    const messages = [
+      {
+        "role": "user",
+        "content": 'you are a travel planning assistant, your first task is to collect information from the user to complete a JSON object. You should maintaining a conversational flow, not ask all the informations at once. when all the necessary data is collected, send a JSON in the following format: {"name": String, "airport_included": boolean, "origin": {"name_city": String}, "arrival": {"name_city": String}, "date": String, "return_date": String, "daily_budget": Number, "currency": String}. Dates should be converted to the yyyy-mm-dd format, and the user should be free to input dates in any format, do not ask to him to put in a specific format. If the user does not want to include flights, do not need ask for the origin city, only destination. Try to keep the messages simple and small. send With the text, a json in this format {"field1": String, field2: String} and the field will be the name of field collected in this step.',
+      }, {
+        "role": "assistant",
+        "content": "Ola, serei seu assistente de viagem, irei estar te auxiliando a planejar a melhor viagem possivel, inicialmente, me diga seu nome por favor"
+        //   "content": "Hello, I'll be your travel assistant, helping you plan the best trip possible. First, please tell me your name."
+      },
+    ]
+    dispatch({ type: 'setmessagesAI', payload: messages });
+    messages.map((m) => {
+      AppState.addMessage(m);
+    });
+  }
+
   return (
     <ChatView
       text={text}
@@ -371,7 +282,7 @@ function ChatLogic() {
       messagesEndRef={messagesEndRef}
     />
   );
-  
+
 }
 
 export default ChatLogic;
