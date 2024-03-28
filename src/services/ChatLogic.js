@@ -12,7 +12,7 @@ function ChatLogic() {
   const text = useTypingEffect("I'm your travel assistant", 20);
   const text2 = useTypingEffect("mr. flight", 20);
 
-  const [state, dispatch] = useReducer(reducer, { name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hasFlight: false, hotels: [], activities: [], meals: {}, cityOrigin: "", cityDestination: "", country: "", days: null, value: null, currency: '', messagesAI: [] });
+  const [state, dispatch] = useReducer(reducer, { name: '', departure: [], destination: [], date: "", returnDate: "", flights: [], hasFlight: null, hotels: [], activities: [], meals: {}, cityOrigin: "", cityDestination: "", country: "", days: null, value: null, currency: '', messagesAI: [] });
 
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -35,7 +35,7 @@ function ChatLogic() {
     setMessages([
       {
         // text: 'Hello, I will be your travel assistant, helping you plan the best trip possible. First, please tell me your name.',
-        text: 'Ola, serei seu assistente de viagem, irei estar te auxiliando a planejar a melhor viagem possivel, inicialmente, me diga seu nome por favor',
+        text: 'Ola, serei seu assistente de viagem, irei estar te auxiliando a planejar a melhor viagem possivel, inicialmente, me diga seu nome por favor.',
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString()
       }
@@ -45,13 +45,13 @@ function ChatLogic() {
       console.log('connected on websocket server!');
     }
 
-    socket.onmessage = (event) => {
+    socket.onmessage = async (event) => {
       let newMessage;
       try {
         const jsonData = JSON.parse(event.data);
         console.log(jsonData)
         let jsonExtracted;
-        if (jsonData?.messages) jsonExtracted = extractJson(jsonData?.messages[jsonData.messages.length - 1]?.content);
+        if (jsonData?.messages) jsonExtracted = await extractJson(jsonData?.messages[jsonData.messages.length - 1]?.content);
         if (!jsonExtracted && jsonData?.messages) {
           AppState.addMessage({ role: 'assistant', content: jsonData?.messages[jsonData.messages.length - 1]?.content });
           newMessage = {
@@ -73,21 +73,66 @@ function ChatLogic() {
             cityDestination: jsonExtracted?.arrival?.name_city
           };
           socket.send(JSON.stringify(data));
+        } else if (jsonExtracted?.airport_included == false) {
+          newMessage = {
+            text: "iremos preencher as refeições e atividades para seu planejamento, aguarde um momento!",
+            sender: 'assistant',
+            timestamp: new Date().toLocaleTimeString(),
+          };
+          setMessages(prevMessages => [...prevMessages, newMessage]);
+          let data = {
+            action: 'find_activities',
+            city: jsonExtracted.arrival?.name_city,
+            days: differenceInDays(jsonExtracted?.date, jsonExtracted?.return_date),
+            value: jsonExtracted.daily_budget,
+            currency: jsonExtracted.currency
+          };
+          socket.send(JSON.stringify(data));
         }
         if (jsonData.cityData) {
           if (jsonData.cityData && state.departure.length === 0) {
-            dispatch({ type: 'setDestination', payload: jsonData.result.city2.closest_city_with_airport });
-            dispatch({ type: 'setDeparture', payload: jsonData.cityData });
             if (jsonData.cityData.length > 1) {
               createMessageOptionsAirports(jsonData.cityData);
             }
           }
+        }
 
-          if (stepsApplied.current.flights && stepsApplied.current.activities && stepsApplied.current.meals) {
-            setInterval(() => {
-              navigate("/result");
-            }, 5000);
-          }
+        if (jsonData.result?.travel_plan?.activities_travel) {
+          dispatch({ type: 'setActivities', payload: jsonData.result });
+          stepsApplied.current.activities = true;
+          newMessage = {
+            text: "atividades incluidas, agora iremos adicionar as refeições. Aguarde um momento!",
+            sender: 'assistant',
+            timestamp: new Date().toLocaleTimeString(),
+          };
+          setMessages(prevMessages => [...prevMessages, newMessage]);
+          let data = {
+            action: 'find_meals',
+            city: jsonData.result.travel_plan.destination,
+            days: jsonData.result.travel_plan.duration,
+            value: jsonData.result.travel_plan.budget,
+            currency: jsonData.result.travel_plan.currency
+          };
+          socket.send(JSON.stringify(data));
+        }
+          
+        if (jsonData.result?.meals_travel) {
+          dispatch({ type: 'setMeals', payload: jsonData.result });
+          stepsApplied.current.meals = true;
+          newMessage = {
+            text: "atividades incluidas, agora iremos adicionar as refeições. Aguarde um momento!",
+            sender: 'assistant',
+            timestamp: new Date().toLocaleTimeString(),
+          };
+          setMessages(prevMessages => [...prevMessages, newMessage]);
+          
+        }
+        console.log(stepsApplied.current)
+        // if (stepsApplied.current.flights && stepsApplied.current.activities && stepsApplied.current.meals) {
+        if (stepsApplied.current.activities && stepsApplied.current.meals) {
+          setInterval(() => {
+            navigate("/result");
+          }, 5000);
         }
       } catch (error) {
         console.error("Erro ao fazer o parsing da string JSON:", error);
@@ -202,7 +247,7 @@ function ChatLogic() {
   const createMessageOptionsAirports = data => {
     try {
       const newMessage = {
-        text: 'Escolha o aeroporto de origem, por favor utilize o codigo do aeroporto. Exemplo: LHR para Londres Heathrow, GRU para Guarulhos, bkk para bangkok etc. ou escreva "Outro" caso o seu aeroporto nao esteja nessa lista',
+        text: 'Escolha o aeroporto de origem, por favor utilize o codigo do aeroporto. Exemplo: LHR para Londres Heathrow, GRU para Guarulhos, NRT para toquio narita etc. ou escreva "Outro" caso o seu aeroporto nao esteja nessa lista',
         sender: 'assistant',
         timestamp: new Date().toLocaleTimeString(),
       };
@@ -245,6 +290,18 @@ function ChatLogic() {
     };
     socket.send(JSON.stringify(data));
     setInputText('');
+
+    if (state.departure.length > 1) {
+      const airport = state.departure.find(item => item.skyId === inputText);
+      if (airport.length > 0) dispatch({ type: 'setDeparture', payload: airport });
+      data = {
+        action: 'find_airport',
+        cityOrigin: state.cityOrigin,
+        cityDestination: state.cityDestination,
+        departure: AppState.departure
+      };
+      socket.send(JSON.stringify(data));
+    }
   }
 
   const handleKeyDown = (e) => {
